@@ -1,5 +1,5 @@
-## 7TV Twitch Chat Emote Picker [1] 
-A Google Chrome extension that adds a custom, draggable, and resizable 7TV emote menu to the bottom right of Twitch chat. It automatically resolves the current streamer's 7TV emotes and allows loading other streamers' emotes. [2] 
+## 7TV Twitch Chat Emote Picker
+A Google Chrome extension that adds a custom, draggable, and resizable 7TV emote menu to the bottom right of Twitch chat. It automatically resolves the current streamer's 7TV emotes and allows loading other streamers' emotes.
 ## ✨ Features
 
 * Auto-Detector: Reads URL to find the streamer's 7TV emotes via decapi.me.
@@ -15,10 +15,10 @@ A Google Chrome extension that adds a custom, draggable, and resizable 7TV emote
    2. Open Chrome and navigate to chrome://extensions/.
    3. Enable "Developer mode" in the top right.
    4. Click "Load unpacked" and select the folder containing the extension files.
-   5. Go to any Twitch channel, and the button will appear in the chat. [3, 4] 
+   5. Go to any Twitch channel, and the button will appear in the chat.
 
 ## 📸 Screenshots
-(Add screenshot here: ![Demo Menu](screenshot.png))
+(Add screenshot here: ![Demo Menu](screenshot.jpg))
 ## 🛠️ How It Works
 
 * URL Parsing: Detects streamer name from the URL.
