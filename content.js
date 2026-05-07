@@ -34,7 +34,7 @@ function injectEmoteButton() {
 		//btn.innerHTML = '7TV'; 
         btn.className = 'inject-7tv-button';
 		
-        
+        const channelName = window.location.pathname.split('/')[1];
         // 2. Create the Frame
         const frame = document.createElement('iframe');
         frame.id = 'my-7tv-menu';
