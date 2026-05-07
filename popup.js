@@ -9,15 +9,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 1. Initial Focus
     searchBox.focus();
 
-// Listen for the "focus-search" message from the content script
-window.addEventListener('message', (event) => {
-    if (event.data === 'focus-search') {
-        const searchBox = document.getElementById('search-box');
-        if (searchBox) {
-            searchBox.focus({ preventScroll: true });
-        }
-    }
-});
+	// Listen for the "focus-search" message from the content script
+	window.addEventListener('message', (event) => {
+		if (event.data === 'focus-search') {
+			const searchBox = document.getElementById('search-box');
+			if (searchBox) {
+				searchBox.focus({ preventScroll: true });
+			}
+		}
+	});
 
 
     // 2. Global Focus Trap
@@ -58,28 +58,20 @@ window.addEventListener('message', (event) => {
         }
     };
 
-    // 4. Auto-detect Twitch Channel from URL
- // New URL detection for Iframe mode
-// 4. Auto-detect Twitch Channel from OWN URL parameters
-    const urlParams = new URLSearchParams(window.location.search);
-    const channelName = urlParams.get('channel');
+	// 4. Auto-detect Twitch Channel from the Iframe URL
+	const urlParams = new URLSearchParams(window.location.search);
+	const channelName = urlParams.get('channel');
 
-    if (channelName && !['directory', 'home', 'popout'].includes(channelName)) {
-        userInput.value = channelName;
-        handleLoad();
-    } else {
-        // Fallback for when you open it via the Extension Toolbar icon
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            if (tabs[0]?.url?.includes("twitch.tv/")) {
-                const parts = tabs[0].url.split("/");
-                const name = parts[parts.length - 1].split("?")[0];
-                if (name && !['directory', 'home'].includes(name)) {
-                    userInput.value = name;
-                    handleLoad();
-                }
-            }
-        });
-    }
+	const ignoredPages = ['directory', 'home', 'popout', 'videos', 'u'];
+
+	if (channelName && !ignoredPages.includes(channelName.toLowerCase())) {
+		userInput.value = channelName;
+		handleLoad();
+	} else {
+		// If it's opened via the Toolbar, just let the user type the name manually
+		console.log("Please enter a username to load emotes.");
+	}
+
 });
 
 async function handleLoad() {

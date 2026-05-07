@@ -19,7 +19,6 @@ function injectEmoteButton() {
 		// Ensure the button itself has a defined width so it doesn't default to 0
 		btn.style.width = '30px'; 
 		btn.style.height = '30px';
-		
 		btn.style.order = '999';
 		
 		// Create the icon image element
@@ -31,14 +30,12 @@ function injectEmoteButton() {
 
 		// Add icon to button instead of text
 		btn.appendChild(icon);
-		//btn.innerHTML = '7TV'; 
         btn.className = 'inject-7tv-button';
 		
         const channelName = window.location.pathname.split('/')[1];
         // 2. Create the Frame
         const frame = document.createElement('iframe');
         frame.id = 'my-7tv-menu';
-        //frame.src = chrome.runtime.getURL('popup.html'); <-- unsafe
 		frame.src = chrome.runtime.getURL(`popup.html?channel=${encodeURIComponent(channelName)}`);
         frame.className = 'my-7tv-iframe-hidden';
 
