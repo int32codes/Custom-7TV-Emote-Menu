@@ -18,7 +18,7 @@ A Google Chrome extension that adds a custom, draggable, and resizable 7TV emote
    5. Go to any Twitch channel, and the button will appear in the chat.
 
 ## 📸 Screenshots
-(Add screenshot here: ![Demo Menu](screenshot.jpg))
+![Demo Menu](screenshot.jpg)
 ## 🛠️ How It Works
 
 * URL Parsing: Detects streamer name from the URL.
