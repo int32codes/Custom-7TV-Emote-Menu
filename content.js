@@ -129,30 +129,38 @@ window.addEventListener('message', (event) => {
 });
 
 function insertTextIntoTwitchChat(text) {
-    // 1. Target by the class name you found + the Slate attribute
-    // This is more reliable than data-a-target because classes are harder to miss
-    const chatEditor = document.querySelector('.chat-wysiwyg-input__editor[data-slate-editor="true"]');
+    const editor = document.querySelector('.chat-wysiwyg-input__editor[data-slate-editor="true"]');
+    if (!editor) return;
 
-    if (chatEditor) {
-        chatEditor.focus();
+    editor.focus();
 
-        // 2. Use the 'beforeinput' event - this is the "secret sauce" for Slate.js
-        // It tells the editor: "Hey, someone just typed this, please update your state"
-        const inputEvent = new InputEvent('beforeinput', {
-            inputType: 'insertText',
-            data: text + " ",
-            bubbles: true,
-            cancelable: true
-        });
-        chatEditor.dispatchEvent(inputEvent);
-
-        // 3. Fallback: execCommand
-        // If the event above doesn't show the text, this will force it into the UI
-        document.execCommand('insertText', false, text + " ");
-
-    } else {
-        // 4. Debugging: If it still fails, let's see what IS there
-        console.error("Editor not found. Search results for class:", 
-            document.getElementsByClassName('chat-wysiwyg-input__editor').length);
+    // 1. Clear the selection to prevent "Path/Offset" mismatches
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        // If the editor is empty, Slate likes a fresh range
+        if (editor.textContent.length === 0) {
+            range.selectNodeContents(editor);
+            range.collapse(true);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
     }
+
+    // 2. The "Secret Sauce": Use a DataTransfer object
+    // This tells Slate: "A user just pasted this," which forces Slate to 
+    // re-calculate the entire path correctly instead of crashing.
+    const dataTransfer = new DataTransfer();
+    dataTransfer.setData('text/plain', text + ' ');
+
+    const event = new ClipboardEvent('paste', {
+        clipboardData: dataTransfer,
+        bubbles: true,
+        cancelable: true
+    });
+
+    editor.dispatchEvent(event);
+
+    // 3. Fallback for the "Chat" button
+    editor.dispatchEvent(new Event('input', { bubbles: true }));
 }

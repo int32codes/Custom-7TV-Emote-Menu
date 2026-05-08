@@ -1,3 +1,4 @@
+const CLIENT_ID = 'swluqqmuvlat8dyvfb3dlkuzt7m1lk';
 let allEmotes = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -21,8 +22,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     // 2. Global Focus Trap
-    // If user clicks empty space, return focus to search box
-    document.addEventListener('mousedown', (e) => {
+    // If user clicks empty space, return focus to search box 
+	document.addEventListener('mousedown', (e) => {
         // List of elements that ARE allowed to have focus
         const focusableElements = ['INPUT', 'BUTTON', 'A'];
         
@@ -36,7 +37,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }, 0);
         }
     });
-	
 
     // 3. Button Listeners
     loadBtn.onclick = () => {
@@ -82,17 +82,112 @@ async function handleLoad() {
     setStatus(`Fetching ${username}...`);
     
     try {
-        const idResponse = await fetch(`https://decapi.me/twitch/id/${username}`);
+		
+		// 1.  Endpoint for Twitch ID via Decapi
+		const idResponse = await fetch(`https://decapi.me/twitch/id/${username}`);
         const twitchId = await idResponse.text();
 
         if (!twitchId || twitchId.includes("not found")) throw new Error("User not found");
 
-        const response = await fetch(`https://7tv.io/v3/users/twitch/${twitchId}`);
-        if (!response.ok) throw new Error('No 7TV profile');
+
+
+		// 2.  Endpoint for 7TV Channel Emotes (v3 API)
+        const response7tv = await fetch(`https://7tv.io/v3/users/twitch/${twitchId}`);
+        if (!response7tv.ok) throw new Error('No 7TV profile');
+		
+	   const data7tv = response7tv.ok ? await response7tv.json() : { emote_set: { emotes: [] } };
         
-        const data = await response.json();
-        allEmotes = data.emote_set.emotes;
-        
+	
+        // 3. Map 7TV emotes
+        let combined = (data7tv.emote_set?.emotes || []).map(e => ({
+            name: e.name,
+            url: `https:${e.data.host.url}/2x.webp`,
+            source: '7tv'
+        }));
+		
+
+      // 4. Get official Twitch emotes if logged in
+		const token = await checkTwitchLogin(); 
+
+		if (token) {
+	
+			try {
+				// Use the Helix API domain (api.twitch.tv)
+				const userRes = await fetch('https://api.twitch.tv/helix/users', {
+					headers: { 
+						'Client-ID': CLIENT_ID, 
+						'Authorization': `Bearer ${token}` 
+					}
+				});
+				
+				
+				const userData = await userRes.json();
+				
+				if (userData.data && userData.data.length > 0) {
+			
+					const myId = userData.data[0].id; 
+				
+					// Helix API URL with the required query parameter
+					const url = `https://api.twitch.tv/helix/chat/emotes/user?user_id=${myId}`;
+
+					const twitchRes = await fetch(url, {
+						headers: { 
+							'Client-Id': CLIENT_ID, 
+							'Authorization': `Bearer ${token}` 
+						}
+					});
+
+
+				let cursor = "";
+				let hasMore = true;
+
+				while (hasMore) {
+					// Append the cursor to the URL
+					const pagedUrl = cursor ? `${url}&after=${cursor}` : url;
+
+					try {
+						const twitchRes = await fetch(pagedUrl, {
+							headers: { 
+								'Client-Id': CLIENT_ID, 
+								'Authorization': `Bearer ${token}` 
+							}
+						});
+
+						const twitchData = await twitchRes.json();
+
+						if (twitchData.data && twitchData.data.length > 0) {
+							const officialOnes = twitchData.data.map(e => ({
+								name: e.name,
+								url: `https://static-cdn.jtvnw.net/emoticons/v2/${e.id}/default/dark/1.0`,
+								source: 'twitch'
+							}));
+
+							// Add this page's emotes to your combined list
+							combined = [...officialOnes, ...combined];
+						}
+
+						// Check if there is another page
+						if (twitchData.pagination && twitchData.pagination.cursor) {
+							cursor = twitchData.pagination.cursor;
+						} else {
+							hasMore = false; // No cursor means we're done
+						}
+					} catch (err) {
+						console.error("Pagination fetch failed:", err);
+						hasMore = false;
+					}
+				}
+				
+				
+				
+				
+				}
+			} catch (err) {
+				console.error("Twitch fetch failed:", err);
+			}
+		}
+
+        allEmotes = combined;
         renderEmotes(allEmotes);
         setStatus(`${allEmotes.length} emotes found.`);
         searchBox.focus();
@@ -103,35 +198,50 @@ async function handleLoad() {
     }
 }
 
+
+
+
+// Helper to trigger the login popup
+async function checkTwitchLogin() {
+    const data = await chrome.storage.local.get('twitchToken');
+    
+    // 1. If we have a token, return it
+    if (data.twitchToken) return data.twitchToken;
+    
+    // 2. Otherwise, ask background to start the flow
+    console.log("Requesting login flow...");
+    chrome.runtime.sendMessage({ type: 'START_LOGIN' }, (response) => {
+        if (response?.status === 'success') {
+            console.log("Logged in!");
+        } else if (response?.status === 'pending') {
+            console.log("Login already in progress...");
+        }
+    });
+
+    setStatus("Login window opened. Please authorize!");
+    return null; 
+}
+
+
+
+
 function renderEmotes(emotesToDisplay) {
-    const container = document.getElementById('emote-grid');
-    const searchBox = document.getElementById('search-box');
+    //const searchBox = document.getElementById('search-box');
+	const container = document.getElementById('emote-grid');
     container.innerHTML = '';
 
     emotesToDisplay.forEach(emote => {
         const card = document.createElement('div');
-        card.className = 'emote-card';
+        card.className = `emote-card ${emote.source === 'twitch' ? 'twitch-border' : ''}`;
         
-        card.onclick = (e) => {
-            //navigator.clipboard.writeText(emote.name);
-            
-			// 2. Send the emote to the Twitch page (the parent)
-			window.parent.postMessage({
-				type: 'SEND_EMOTE',
-				emoteName: emote.name
-			}, '*');
-			
-            // Visual Feedback
-            const oldBg = card.style.background;
-            card.style.background = "#9147ff";
-            setTimeout(() => card.style.background = oldBg, 200);
-            
-            searchBox.focus();
+        card.onclick = () => {
+            window.parent.postMessage({ type: 'SEND_EMOTE', emoteName: emote.name }, '*');
+            //searchBox.focus();
         };
 
         const img = document.createElement('img');
         img.className = 'emote-image';
-        img.src = `https:${emote.data.host.url}/2x.webp`;
+        img.src = emote.url;
         
         const nameLabel = document.createElement('div');
         nameLabel.className = 'emote-name';
