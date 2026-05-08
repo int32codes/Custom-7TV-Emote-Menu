@@ -1,13 +1,42 @@
 const CLIENT_ID = 'swluqqmuvlat8dyvfb3dlkuzt7m1lk';
 let allEmotes = [];
 
+
+
+
+
+
+
+
+
 document.addEventListener('DOMContentLoaded', async () => {
     const loadBtn = document.getElementById('load-btn');
     const clearBtn = document.getElementById('clear-btn');
     const searchBox = document.getElementById('search-box');
     const userInput = document.getElementById('user-input');
 
-    // 1. Initial Focus
+
+	//1. Log-out button for Twitch OAuth	
+    // Check if we already have a token from a previous session
+    chrome.storage.local.get('twitchToken', (data) => {
+        if (data.twitchToken) {
+            document.getElementById('logoutBtn').style.display = 'block';
+        }
+    });
+
+    // Add the listener here
+    logoutBtn.addEventListener('click', () => {
+        chrome.storage.local.remove('twitchToken', () => {
+            console.log("Token removed");
+            logoutBtn.style.display = 'none'; // Hide button after logout
+            setStatus("Logged out! Press 'Load' to login again.");
+        });
+    });
+
+
+
+
+    // 2. Initial Focus
     searchBox.focus();
 
 	// Listen for the "focus-search" message from the content script
@@ -21,7 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 	});
 
 
-    // 2. Global Focus Trap
+    // 3. Global Focus Trap
     // If user clicks empty space, return focus to search box 
 	document.addEventListener('mousedown', (e) => {
         // List of elements that ARE allowed to have focus
@@ -38,7 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // 3. Button Listeners
+    // 4. Button Listeners
     loadBtn.onclick = () => {
         handleLoad();
         searchBox.focus();
@@ -213,6 +242,7 @@ async function checkTwitchLogin() {
     chrome.runtime.sendMessage({ type: 'START_LOGIN' }, (response) => {
         if (response?.status === 'success') {
             console.log("Logged in!");
+			document.getElementById('logoutBtn').style.display = 'block';
         } else if (response?.status === 'pending') {
             console.log("Login already in progress...");
         }

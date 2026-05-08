@@ -135,6 +135,26 @@
 		
 
 		
+		.icon-btn {
+			background: transparent;
+			border: 1px solid rgba(255, 255, 255, 0.3);
+			border-radius: 4px;
+			padding: 4px;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			transition: background 0.2s;
+		}
+
+		.icon-btn:hover {
+			background: rgba(255, 255, 255, 0.1);
+			border-color: white;
+		}
+
+		
+		
+		
     </style>
 </head>
 <body>
@@ -143,6 +163,7 @@
         <div class="user-settings">
             <input type="text" id="user-input" placeholder="Twitch Username">
             <button id="load-btn">Load</button>
+			<button id="logoutBtn" class="icon-btn" style="display:none;" title="Log Out">×</button>
         </div>
         <div id="status-display" class="status-msg"></div>
 
