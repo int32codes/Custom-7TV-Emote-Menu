@@ -246,6 +246,8 @@ async function checkTwitchLogin() {
         if (response?.status === 'success') {
             console.log("Logged in!");
 			document.getElementById('logoutBtn').style.display = 'block';
+			// AUTO-RESUME: Run the fetch now that we have the token
+			//handleLoad(); //Without this, the user must press "Load" to see twitch emotes.
         } else if (response?.status === 'pending') {
             console.log("Login already in progress...");
         }
