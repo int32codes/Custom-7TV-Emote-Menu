@@ -14,15 +14,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     const clearBtn = document.getElementById('clear-btn');
     const searchBox = document.getElementById('search-box');
     const userInput = document.getElementById('user-input');
+	const logoutBtn = document.getElementById('logoutBtn'); //Logout
 
 
 	//1. Log-out button for Twitch OAuth	
     // Check if we already have a token from a previous session
     chrome.storage.local.get('twitchToken', (data) => {
         if (data.twitchToken) {
-            document.getElementById('logoutBtn').style.display = 'block';
+            logoutBtn.style.display = 'block';
         }
     });
+	
+	
 
     // Add the listener here
     logoutBtn.addEventListener('click', () => {
