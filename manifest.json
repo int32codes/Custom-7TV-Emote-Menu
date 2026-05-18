@@ -2,7 +2,7 @@
   "manifest_version": 3,
    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAktL4RvTKSs2jcN6APppaJeMcvnhPfN7Z4BOmDQ8nIUPlhteAFo70Je5ICwaC56CvuAo3M0ruww/8w564ov17Iz17SbquWzTGPYkqTf5dXg3H9k/Qj5AwoemvBbK/W95+La+htnD6zgXZp3Em0BrcrhKpDfJM3tcDMRvurltxhUTwpw6P+3r0H+B9JSxqtVIxzEhSGe93a9nJR2nrJRK151EvY/bbH6pmWwDEZrf/7noGy5aD4S5rU9PMjWNCDni1BLSLjJdiQzYjaCOD19zchHfoedDl75md9vl8mZ6PabI1+aur/OGXmt8hfxhp6gUIQV6pEX1Y6SKk0gLAtLCZ5QIDAQAB",
   "name": "Custom 7TV Emote Menu by Int32",
-  "version": "1.3", 
+  "version": "1.4", 
   "action": {
     "default_popup": "popup.html"
   },
